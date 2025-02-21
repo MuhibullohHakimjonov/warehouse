@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"database/sql"
+	"fmt"
 	"warehouse/api/new/internal/models"
 )
 
@@ -14,6 +15,16 @@ func NewProductRepository(db *sql.DB) *ProductRepository {
 }
 
 func (r *ProductRepository) CreateProduct(product *models.Product) error {
+	var exists bool
+	checkQuery := `SELECT EXISTS(SELECT 1 FROM shelves WHERE path = $1)`
+	err := r.db.QueryRow(checkQuery, product.Location).Scan(&exists)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		return fmt.Errorf("location '%s' does not exist in shelves", product.Location)
+	}
+
 	query := `INSERT INTO products (product_name, type, location) VALUES ($1, $2, $3) RETURNING id`
 	return r.db.QueryRow(query, product.ProductName, product.Type, product.Location).Scan(&product.ID)
 }

@@ -97,7 +97,6 @@ func (h *ProductHandler) CreateShelf(w http.ResponseWriter, r *http.Request) {
 	decoder.DisallowUnknownFields()
 
 	if err := decoder.Decode(&shelf); err != nil {
-		log.Printf("Failed to decode request body: %v", err)
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
